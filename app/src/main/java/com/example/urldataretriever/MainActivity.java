@@ -1,7 +1,11 @@
 package com.example.urldataretriever;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -28,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private PostAdapter adapter;
     private LoaderManager loaderManager;
     private ProgressBar progressBar;
+    private boolean isConnected;
+    private ConnectivityManager cm;
     private LoaderManager.LoaderCallbacks<BitmapWithIndex> bitmapLoaderCallbacks;
     LoaderManager.LoaderCallbacks<ArrayList<JSONPost>> postLoaderCallbacks;
 
@@ -35,6 +41,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        loaderManager = getSupportLoaderManager();
+        cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
 
         swipeRefreshLayout  = findViewById(R.id.refresh_layout);
         recyclerView = findViewById(R.id.recycler_view);
@@ -44,8 +56,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
         recyclerView.setAdapter(adapter);
         progressBar = findViewById(R.id.progress_bar);
-
-        loaderManager = getSupportLoaderManager();
 
         //TO Retrieve JSON Data First
         postLoaderCallbacks = new LoaderManager.LoaderCallbacks<ArrayList<JSONPost>>() {
@@ -74,9 +84,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        //INITIALIZE TO Retrieve JSON Data First
-        loaderManager.initLoader(0, null, postLoaderCallbacks);
-
         //TO Retrieve Bitmaps from URL retrieved from JSON Asynchronously
         bitmapLoaderCallbacks = new LoaderManager.LoaderCallbacks<BitmapWithIndex>() {
             @NonNull
@@ -102,12 +109,32 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        if(isConnected) {
+            //INITIALIZE TO Retrieve JSON Data First
+            loaderManager.initLoader(0, null, postLoaderCallbacks);
+        }
+        else {
+            Snackbar.make(swipeRefreshLayout, "No Internet Connection.",
+                    Snackbar.LENGTH_SHORT)
+                    .show();
+        }
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                //INITIALIZE TO Retrieve JSON Data First
-                loaderManager.restartLoader(0, null, postLoaderCallbacks);
+                NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                isConnected = activeNetwork != null &&
+                        activeNetwork.isConnectedOrConnecting();
+                if(isConnected) {
+                    //INITIALIZE TO Retrieve JSON Data First
+                    loaderManager.restartLoader(0, null, postLoaderCallbacks);
+                }
+                else {
+                    Snackbar.make(swipeRefreshLayout, "No Internet Connection.",
+                            Snackbar.LENGTH_SHORT)
+                            .show();
+                    swipeRefreshLayout.setRefreshing(false);
+                }
             }
         });
     }
