@@ -93,6 +93,8 @@ public class ImageUtils {
         return null;
     }
 
+
+    //Decoding Image from Input Stream
     private static BitmapWithIndex readFromStream(InputStream inputStream, int index) throws IOException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         return new BitmapWithIndex(BitmapFactory.decodeStream(inputStream,null,options), index);

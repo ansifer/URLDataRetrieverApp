@@ -1,7 +1,5 @@
 package com.example.urldataretriever;
 
-
-import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -24,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
     private PostAdapter adapter;
     private LoaderManager loaderManager;
     private LoaderManager.LoaderCallbacks<BitmapWithIndex> bitmapLoaderCallbacks;
-    private int postIndex = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         loaderManager = getSupportLoaderManager();
+
+        //TO Retrieve JSON Data First
         LoaderManager.LoaderCallbacks<ArrayList<JSONPost>> postLoaderCallbacks = new LoaderManager.LoaderCallbacks<ArrayList<JSONPost>>() {
             @NonNull
             @Override
@@ -53,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
                     jsonPostArrayList.clear();
                      jsonPostArrayList = posts;
                      for (int j = 0; j < jsonPostArrayList.size() ; j++) {
+                         //Different thread for each image initialize to retrieve bitmaps from URL retrieved from JSON Asynchronously
                          loaderManager.initLoader(j+1, null, bitmapLoaderCallbacks);
                      }
                 }
@@ -64,8 +64,10 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        //INITIALIZE TO Retrieve JSON Data First
         loaderManager.initLoader(0, null, postLoaderCallbacks);
 
+        //TO Retrieve Bitmaps from URL retrieved from JSON Asynchronously
         bitmapLoaderCallbacks = new LoaderManager.LoaderCallbacks<BitmapWithIndex>() {
             @NonNull
             @Override
