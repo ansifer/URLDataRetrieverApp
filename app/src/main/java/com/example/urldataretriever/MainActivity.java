@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.example.urldataretriever.imagelibrary.ImageLoader;
 import com.example.urldataretriever.postlibrary.PostLoader;
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeRefreshLayout;
     private PostAdapter adapter;
     private LoaderManager loaderManager;
+    private ProgressBar progressBar;
     private LoaderManager.LoaderCallbacks<BitmapWithIndex> bitmapLoaderCallbacks;
     LoaderManager.LoaderCallbacks<ArrayList<JSONPost>> postLoaderCallbacks;
 
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         adapter = new PostAdapter(this, postArrayList);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
         recyclerView.setAdapter(adapter);
+        progressBar = findViewById(R.id.progress_bar);
 
         loaderManager = getSupportLoaderManager();
 
@@ -84,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLoadFinished(@NonNull Loader<BitmapWithIndex> loader, BitmapWithIndex bitmapWithIndex) {
                 if(bitmapWithIndex != null) {
+                    progressBar.setVisibility(View.GONE);
                     swipeRefreshLayout.setRefreshing(false);
                     Post post = new Post(bitmapWithIndex.getBitmap(), jsonPostArrayList.get(bitmapWithIndex.getI()).getUserName());
                     postArrayList.add(post);
