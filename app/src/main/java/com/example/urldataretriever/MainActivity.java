@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -16,18 +17,23 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String POST_URL = "http://pastebin.com/raw/wgkJgazE";
+
     private ArrayList<Post> postArrayList;
     private ArrayList<JSONPost> jsonPostArrayList;
     private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private PostAdapter adapter;
     private LoaderManager loaderManager;
     private LoaderManager.LoaderCallbacks<BitmapWithIndex> bitmapLoaderCallbacks;
+    LoaderManager.LoaderCallbacks<ArrayList<JSONPost>> postLoaderCallbacks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        swipeRefreshLayout  = findViewById(R.id.refresh_layout);
         recyclerView = findViewById(R.id.recycler_view);
         postArrayList = new ArrayList<>();
         jsonPostArrayList = new ArrayList<>();
@@ -38,11 +44,11 @@ public class MainActivity extends AppCompatActivity {
         loaderManager = getSupportLoaderManager();
 
         //TO Retrieve JSON Data First
-        LoaderManager.LoaderCallbacks<ArrayList<JSONPost>> postLoaderCallbacks = new LoaderManager.LoaderCallbacks<ArrayList<JSONPost>>() {
+        postLoaderCallbacks = new LoaderManager.LoaderCallbacks<ArrayList<JSONPost>>() {
             @NonNull
             @Override
             public Loader<ArrayList<JSONPost>> onCreateLoader(int i, @Nullable Bundle bundle) {
-                return new PostLoader(MainActivity.this, "http://pastebin.com/raw/wgkJgazE");
+                return new PostLoader(MainActivity.this, POST_URL);
             }
 
             @Override
@@ -78,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLoadFinished(@NonNull Loader<BitmapWithIndex> loader, BitmapWithIndex bitmapWithIndex) {
                 if(bitmapWithIndex != null) {
+                    swipeRefreshLayout.setRefreshing(false);
                     Post post = new Post(bitmapWithIndex.getBitmap(), jsonPostArrayList.get(bitmapWithIndex.getI()).getUserName());
                     postArrayList.add(post);
                     adapter.notifyDataSetChanged();
@@ -90,6 +97,14 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                //INITIALIZE TO Retrieve JSON Data First
+                loaderManager.restartLoader(0, null, postLoaderCallbacks);
+            }
+        });
     }
 
 }
