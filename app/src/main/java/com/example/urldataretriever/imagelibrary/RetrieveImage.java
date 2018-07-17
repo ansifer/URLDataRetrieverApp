@@ -30,7 +30,8 @@ public class RetrieveImage {
         LoaderManager.LoaderCallbacks<BitmapWithIndex> bitmapWithIndexLoaderCallbacks = new LoaderManager.LoaderCallbacks<BitmapWithIndex>() {
             @Override
             public Loader<BitmapWithIndex> onCreateLoader(int i, Bundle bundle) {
-                return new ImageLoader(mContext, imageURL, index-1);
+               // return new ImageLoader(mContext, imageURL, index-1);
+                return null;
             }
 
             @Override

@@ -2,7 +2,7 @@ package com.example.urldataretriever.imagelibrary;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.content.AsyncTaskLoader;
+import android.support.v4.content.AsyncTaskLoader;
 
 import com.example.urldataretriever.BitmapWithIndex;
 
