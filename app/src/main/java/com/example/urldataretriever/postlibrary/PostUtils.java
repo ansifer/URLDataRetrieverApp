@@ -1,13 +1,9 @@
 package com.example.urldataretriever.postlibrary;
 
-import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.urldataretriever.JSONPost;
-import com.example.urldataretriever.MainActivity;
-import com.example.urldataretriever.Post;
-import com.example.urldataretriever.imagelibrary.ImageUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

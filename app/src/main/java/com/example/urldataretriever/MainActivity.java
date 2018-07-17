@@ -1,13 +1,15 @@
 package com.example.urldataretriever;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.media.SoundPool;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
+import android.app.LoaderManager;
+import android.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,6 +19,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.example.urldataretriever.imagelibrary.ImageLoader;
+import com.example.urldataretriever.imagelibrary.RetrieveImage;
 import com.example.urldataretriever.postlibrary.PostLoader;
 
 import java.util.ArrayList;
@@ -41,13 +44,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        loaderManager = getSupportLoaderManager();
+        loaderManager = getLoaderManager();
         cm = (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
+        isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
         swipeRefreshLayout  = findViewById(R.id.refresh_layout);
         recyclerView = findViewById(R.id.recycler_view);
         postArrayList = new ArrayList<>();
@@ -73,7 +73,31 @@ public class MainActivity extends AppCompatActivity {
                      jsonPostArrayList = posts;
                      for (int j = 0; j < jsonPostArrayList.size() ; j++) {
                          //Different thread for each image initialize to retrieve bitmaps from URL retrieved from JSON Asynchronously
-                         loaderManager.initLoader(j+1, null, bitmapLoaderCallbacks);
+                         //loaderManager.initLoader(j+1, null, bitmapLoaderCallbacks);
+
+                         RetrieveImage retrieveImage = new RetrieveImage(MainActivity.this,
+                                 jsonPostArrayList.get(j).getImgUrl(),
+                                 j+1);
+
+                         retrieveImage.setRetrieveImageListener(new RetrieveImage.RetrieveImageListener() {
+                             @Override
+                             public void onDataLoaded(Bitmap bitmap, int index) {
+                                 progressBar.setVisibility(View.GONE);
+                                 swipeRefreshLayout.setRefreshing(false);
+                                 Post post = new Post(bitmap, jsonPostArrayList.get(index).getUserName());
+                                 postArrayList.add(post);
+                                 adapter.notifyDataSetChanged();
+                             }
+                         });
+
+                         /*
+                         BitmapWithIndex bitmapWithIndex = (BitmapWithIndex) o;
+                                 progressBar.setVisibility(View.GONE);
+                                 swipeRefreshLayout.setRefreshing(false);
+                                 Post post = new Post(bitmapWithIndex.getBitmap(), jsonPostArrayList.get(bitmapWithIndex.getI()).getUserName());
+                                 postArrayList.add(post);
+                                 adapter.notifyDataSetChanged();
+                          */
                      }
                 }
             }
@@ -84,30 +108,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        //TO Retrieve Bitmaps from URL retrieved from JSON Asynchronously
-        bitmapLoaderCallbacks = new LoaderManager.LoaderCallbacks<BitmapWithIndex>() {
-            @NonNull
-            @Override
-            public Loader<BitmapWithIndex> onCreateLoader(int i, @Nullable Bundle bundle) {
-                    return new ImageLoader(MainActivity.this, jsonPostArrayList.get(i-1).getImgUrl(), i-1);
-            }
-
-            @Override
-            public void onLoadFinished(@NonNull Loader<BitmapWithIndex> loader, BitmapWithIndex bitmapWithIndex) {
-                if(bitmapWithIndex != null) {
-                    progressBar.setVisibility(View.GONE);
-                    swipeRefreshLayout.setRefreshing(false);
-                    Post post = new Post(bitmapWithIndex.getBitmap(), jsonPostArrayList.get(bitmapWithIndex.getI()).getUserName());
-                    postArrayList.add(post);
-                    adapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onLoaderReset(@NonNull Loader<BitmapWithIndex> loader) {
-
-            }
-        };
 
         if(isConnected) {
             //INITIALIZE TO Retrieve JSON Data First

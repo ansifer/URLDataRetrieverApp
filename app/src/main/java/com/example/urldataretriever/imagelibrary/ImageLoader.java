@@ -1,14 +1,10 @@
 package com.example.urldataretriever.imagelibrary;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
-import android.support.v4.content.AsyncTaskLoader;
+import android.content.AsyncTaskLoader;
 
 import com.example.urldataretriever.BitmapWithIndex;
-import com.example.urldataretriever.Post;
-
-import java.util.ArrayList;
 
 public class ImageLoader extends AsyncTaskLoader<BitmapWithIndex> {
 

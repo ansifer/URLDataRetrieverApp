@@ -2,10 +2,9 @@ package com.example.urldataretriever.postlibrary;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.support.v4.content.AsyncTaskLoader;
+import android.content.AsyncTaskLoader;
 
 import com.example.urldataretriever.JSONPost;
-import com.example.urldataretriever.Post;
 
 import java.util.ArrayList;
 
